@@ -18,7 +18,7 @@ class AuthController extends Controller
     public function get_all_users(Request $request)
     {
 
-        $users = User::whereHas('status', function ($query) {
+        $users = User::with('department')->whereHas('status', function ($query) {
             $query->where('description', 'Activo');
         })
             // ->whereHas('role', function ($query) {

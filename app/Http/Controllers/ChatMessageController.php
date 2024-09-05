@@ -29,20 +29,20 @@ class ChatMessageController extends Controller
     /**
      * Get the messages for the user along with messages count.
      */
-    public function getUnreadMessages(Request $request, )
+    public function getUnreadMessages(Request $request,)
     {
         $messages = ChatMessage::with('from')->where('user_id', $request->user_id)
             ->get();
-        return response()->json(['status'=>true, 'data'=>[]]);
+        return response()->json(['status' => true, 'data' => []]);
     }
-    public function getChatMessages(Request $request,User $from)
+    public function getChatMessages(Request $request, User $from)
     {
-        $user=$request->user();
-        $messages = ChatMessage::select('id','from', 'user_id', 'message', 'created_at')
-        ->where(['user_id'=>$user->id, 'from'=>$from->id])
-        ->orWhere(['user_id'=>$from->id, 'from'=>$user->id])
-        ->orderBy('created_at', 'ASC')
-        ->get();
-        return response()->json(['status'=>true, 'data'=>$messages]);
+        $user = $request->user();
+        $messages = ChatMessage::select('id', 'from', 'user_id', 'message', 'created_at')
+            ->where([['user_id', '=', $user->id], ['from', '=', $from->id]])
+            ->orWhere([['user_id', '=', $from->id], ['from', '=', $user->id]])
+            ->orderBy('created_at', 'ASC')
+            ->get();
+        return response()->json(['status' => true, 'data' => $messages]);
     }
 }
