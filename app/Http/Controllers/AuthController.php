@@ -219,7 +219,9 @@ class AuthController extends Controller
     public function get_logged_user_data(Request $request)
     {
         $data = $request->user();
+        $token = $request->bearerToken();
         $user = User::with('status', 'role', 'department')->where('id', $data->id)->first();
+        $user->token = $token;
         return response()->json(['user' => $user]);
     }
 

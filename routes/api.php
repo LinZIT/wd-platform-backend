@@ -28,6 +28,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('get_users', [AuthController::class, 'get_all_users']);
     Route::post('send-message', [ChatMessageController::class, 'store']);
     Route::post('get-unread-messages', [ChatMessageController::class, 'getUnreadMessages']);
+    Route::get('get/chat/{from}', [ChatMessageController::class, 'getChatMessages']);
 
     // Websocket authorization 
     // Route::post('broadcasting/auth', [AuthController::class, 'index']);
