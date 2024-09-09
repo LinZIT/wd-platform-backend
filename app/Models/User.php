@@ -47,6 +47,7 @@ class User extends Authenticatable
         'level',
         'color',
         'password',
+        'isOnline'
     ];
 
     /**

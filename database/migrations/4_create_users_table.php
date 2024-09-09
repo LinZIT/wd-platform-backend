@@ -23,6 +23,7 @@ return new class extends Migration
             $table->string('theme')->nullable()->default('light');
             $table->string('address')->nullable();
             $table->string('level')->nullable();
+            $table->tinyInteger('isOnline')->nullable();
             $table->unsignedBigInteger('department_id')->nullable();
             $table->foreign('department_id')->references('id')->on('departments')->onUpdate('cascade')->onDelete('cascade');
             $table->unsignedBigInteger('role_id')->nullable();

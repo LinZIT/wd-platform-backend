@@ -24,8 +24,10 @@ Route::middleware('auth:sanctum')->group(function () {
     // Validacion de token
     Route::get('user/data', [AuthController::class, 'get_logged_user_data']);
     // Registrar usuario
+    Route::get('logout', [AuthController::class, 'logout']);
     Route::post('user/add', [AuthController::class, 'register']);
-    Route::get('get_users', [AuthController::class, 'get_all_users']);
+    Route::get('users/online', [AuthController::class, 'get_all_online_users']);
+    Route::get('users/offline', [AuthController::class, 'get_all_offline_users']);
     Route::post('send-message', [ChatMessageController::class, 'store']);
     Route::post('get-unread-messages', [ChatMessageController::class, 'getUnreadMessages']);
     Route::get('get/chat/{from}', [ChatMessageController::class, 'getChatMessages']);

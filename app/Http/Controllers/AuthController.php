@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\Validator;
 
 class AuthController extends Controller
 {
-    public function get_all_users(Request $request)
+    public function get_all_online_users(Request $request)
     {
 
         $users = User::with('department')->whereHas('status', function ($query) {
@@ -24,8 +24,23 @@ class AuthController extends Controller
             // ->whereHas('role', function ($query) {
             //     $query->where('description', 'Usuario');
             // })
+            ->where(['isOnline'=> 1])
+            ->orWhere(['isOnline'=> 0])
+            ->orderBy('isOnline', 'DESC')
             ->get();
+        return response()->json(['status' => true, 'data' => $users]);
+    }
+    public function get_all_offline_users(Request $request)
+    {
 
+        $users = User::with('department')->whereHas('status', function ($query) {
+            $query->where('description', 'Activo');
+        })
+            // ->whereHas('role', function ($query) {
+            //     $query->where('description', 'Usuario');
+            // })
+            ->where('isOnline', 0)
+            ->get();
         return response()->json(['status' => true, 'data' => $users]);
     }
     /**
@@ -38,6 +53,8 @@ class AuthController extends Controller
         }
         $user = User::with('role', 'status', 'department')->where('email', $request['email'])->firstOrFail();
         $token = $user->createToken('auth_token')->plainTextToken;
+        $user->isOnline = 1;
+        $user->save();
         $user->token = $token;
         $G_A_R = GeneralActionRecord::create([
             'description' => "El usuario $user->names $user->surnames ($user->document) inició sesión. ($user->email)",
@@ -64,6 +81,10 @@ class AuthController extends Controller
             'importance' => 'Leve',
             'author' => 'WD-System',
         ]);
+
+        $user_disconnected = User::find($user->id);
+        $user_disconnected->isOnline = 0;
+        $user_disconnected->save();
         $G_A_R->user()->associate($user);
         $G_A_R->save();
         $request->user()->currentAccessToken()->delete();
