@@ -24,6 +24,9 @@ Route::middleware('auth:sanctum')->group(function () {
     // Validacion de token
     Route::get('user/data', [AuthController::class, 'get_logged_user_data']);
     // Registrar usuario
+    Route::put('user/{user}/change/color', [AuthController::class, 'change_color']);
+    Route::put('user/{user}/change/theme', [AuthController::class, 'change_theme']);
+    Route::put('user/{user}/change/password', [AuthController::class, 'change_password']);
     Route::get('logout', [AuthController::class, 'logout']);
     Route::post('user/add', [AuthController::class, 'register']);
     Route::get('users/online', [AuthController::class, 'get_all_online_users']);

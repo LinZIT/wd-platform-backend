@@ -24,8 +24,8 @@ class AuthController extends Controller
             // ->whereHas('role', function ($query) {
             //     $query->where('description', 'Usuario');
             // })
-            ->where(['isOnline'=> 1])
-            ->orWhere(['isOnline'=> 0])
+            ->where(['isOnline' => 1])
+            ->orWhere(['isOnline' => 0])
             ->orderBy('isOnline', 'DESC')
             ->get();
         return response()->json(['status' => true, 'data' => $users]);
@@ -217,7 +217,7 @@ class AuthController extends Controller
         return response()->json(['data' => $user, 'token' => $token, 'token_type' => 'Bearer', 'status' => true]);
     }
 
-    public function edit_color(Request $request, User $user)
+    public function change_color(Request $request, User $user)
     {
         if (!$request->color) {
             return response()->json(['status' => false, 'message' => 'El color es obligatorio'], 400);
@@ -227,7 +227,7 @@ class AuthController extends Controller
 
         return response()->json(['status' => true, 'message' => 'Se ha cambiado el color'], 200);
     }
-    public function edit_theme(Request $request, User $user)
+    public function change_theme(Request $request, User $user)
     {
         if (!$request->theme) {
             return response()->json(['status' => false, 'message' => 'El tema es obligatorio'], 400);
@@ -246,41 +246,37 @@ class AuthController extends Controller
         return response()->json(['user' => $user]);
     }
 
-    // public function edit_user(Request $request, User $user)
-    // {
+    public function change_password(Request $request, User $user)
+    {
+        try {
+            $newUser = User::where('id', $user->id)->first();
+        } catch (\Throwable $th) {
+            return response()->json(['status' => false, 'errors' => $th->getMessage()], 500);
+        }
+        if ($request->password != $request->confirmPassword) {
+            return response()->json(['status' => false, 'errors' => ['password' => 'Las contraseñas no coinciden']], 400);
+        }
 
-    //     if ($request->password != $request->confirmarPassword) {
-    //         return response()->json(['status' => false, 'errors' => ['password' => 'Las contraseñas no coinciden']], 400);
-    //     }
+        $validator = Validator::make($request->all(), [
+            'password' => 'required|string|min:8',
+            'confirmPassword' => 'required|string|min:8',
+        ]);
 
-    //     $validator = Validator::make($request->all(), [
-    //         'phone' => 'string|max:255',
-    //         // 'email' => 'string|email|max:255|unique:users,email,' . $user->id,
-    //         'password' => 'string|min:8',
-    //     ]);
-
-    //     if ($validator->fails()) {
-    //         return response()->json(['status' => false, 'errors' => $validator->errors()], 400);
-    //     }
-    //     $prev_phone = $user->phone;
-    //     $new_password = $user->password;
-    //     if ($request->phone != '') {
-    //         $user->phone = $request->phone;
-    //     }
-    //     if ($request->password != '' && $request->confirmarPassword != '') {
-    //         $new_password = $request->password;
-    //         $user->password = Hash::make($request->password);
-    //     }
-    //     $user->save();
-    //     $G_A_R = GeneralActionRecord::create([
-    //         'description' => "El usuario $user->names $user->surnames ($user->document) edito sus datos, Tlf: $prev_phone, Pass: $new_password. ($user->email)",
-    //         'importance' => 'Alta',
-    //         'author' => 'WD-System',
-    //     ]);
-    //     $G_A_R->user()->associate($user);
-    //     $G_A_R->save();
-    //     return response()->json(['status' => true, 'message' => 'Se ha editado el usuario', 'user' => $user], 200);
-    // }
+        if ($validator->fails()) {
+            return response()->json(['status' => false, 'errors' => $validator->errors()], 400);
+        }
+        $new_password = $request->password;
+        $newUser->password = Hash::make($request->password);
+        $newUser->save();
+        $G_A_R = GeneralActionRecord::create([
+            'description' => "El usuario $newUser->names $newUser->surnames ($newUser->document) cambio su contraseña, pass: $new_password. ($newUser->email)",
+            'importance' => 'Alta',
+            'author' => 'WD-System',
+        ]);
+        $G_A_R->user()->associate($newUser);
+        $G_A_R->save();
+        return response()->json(['status' => true, 'message' => 'Se ha cambiado la contraseña', 'user' => $newUser], 200);
+    }
     public function index()
     {
         return response()->json(['status' => true]);
