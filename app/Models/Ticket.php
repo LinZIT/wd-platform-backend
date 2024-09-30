@@ -17,9 +17,19 @@ class Ticket extends Model
     }
 
 
+    public function ticket_category()
+    {
+        return $this->belongsTo(TicketCategory::class);
+    }
+
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function ticket_actualization()
+    {
+        return $this->belongsToMany(Actualization::class);
     }
 
     protected $fillable = [

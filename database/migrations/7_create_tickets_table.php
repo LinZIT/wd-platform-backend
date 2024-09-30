@@ -16,6 +16,8 @@ return new class extends Migration
             $table->string('description');
             $table->unsignedBigInteger('user_id')->nullable();
             $table->foreign('user_id')->references('id')->on('users')->onUpdate('cascade')->onDelete('cascade');
+            $table->unsignedBigInteger('ticket_category_id')->nullable();
+            $table->foreign('ticket_category_id')->references('id')->on('ticket_categories')->onUpdate('cascade')->onDelete('cascade');
             $table->unsignedBigInteger('department_id')->nullable();
             $table->foreign('department_id')->references('id')->on('departments')->onUpdate('cascade')->onDelete('cascade');
             $table->string('category');
