@@ -34,10 +34,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('users/offline', [AuthController::class, 'get_all_offline_users']);
 
     // Tickets
-    Route::get('ticket', [TicketController::class, 'index']);
+    Route::get('tickets', [TicketController::class, 'index']);
     Route::get('ticket/{ticket}', [TicketController::class, 'get_ticket_by_id']);
     Route::post('ticket', [TicketController::class, 'store']);
     Route::put('ticket/{ticket}/status', [TicketController::class, 'update_ticket_status']);
+    Route::post('ticket-move/{ticket}', [TicketController::class, 'ticket_move']);
 
 
     // Chat Messages

@@ -16,6 +16,6 @@ Broadcast::channel('status_online.{isOnline}', function (User $user, $isOnline) 
 Broadcast::channel('room.{roomId}', function (User $user, $roomId) {
     return $user;
 });
-Broadcast::channel('ticketsView.{roomId}', function (User $user, $roomId) {
-    return (int) $user->department_id === (int) $roomId;
+Broadcast::channel('ticketsRoom.{roomId}', function (User $user, $roomId) {
+    if ((int) $user->department_id === (int) $roomId) return $user;
 });
