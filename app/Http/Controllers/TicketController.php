@@ -22,7 +22,7 @@ class TicketController extends Controller
         $tickets_cancelados = Ticket::where('status', 'Cancelado')->with('user', 'department')->get();
         $tickets_terminados = Ticket::where('status', 'Terminado')->with('user', 'department')->get();
         $tickets = [...$tickets_abiertos, ...$tickets_en_proceso, ...$tickets_cancelados];
-        $tickets_numbers = ['Abiertos' => $tickets_abiertos->count(), 'En Proceso' => $tickets_en_proceso->count(), 'Cancelado' => $tickets_cancelados->count(), 'Terminado' => $tickets_terminados->count()];
+        $tickets_numbers = ['abiertos' => $tickets_abiertos->count(), 'en_proceso' => $tickets_en_proceso->count(), 'cancelados' => $tickets_cancelados->count(), 'terminados' => $tickets_terminados->count()];
         return response()->json(['status' => true, 'data' => ['tickets' => $tickets, 'numbers' => $tickets_numbers]]);
     }
 
@@ -35,10 +35,15 @@ class TicketController extends Controller
     }
     public function ticket_move(Request $request, Ticket $ticket)
     {
-        $user = $request->user();
+        try {
 
-        // $event =  json_decode($request->event, true);
-        return response()->json(['status' => true, 'data' => [$request->status]]);
+            $status = $request->status;
+            $ticket->status = $status;
+            $ticket->save();
+            return response()->json(['status' => true, 'data' => [$request->status]]);
+        } catch (\Exception $e) {
+            return response()->json(['status' => false, 'error' => [$e->getMessage()]], 400);
+        }
     }
 
     /**
