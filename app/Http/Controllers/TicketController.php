@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Events\TicketUpdated;
 use App\Models\Ticket;
 use App\Http\Controllers\Controller;
+use App\Models\Actualization;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -32,6 +33,13 @@ class TicketController extends Controller
     public function create()
     {
         //
+    }
+    public function get_ticket_by_id(Ticket $ticket)
+    {
+        $ticket_res = Ticket::with('department', 'user')->where('id', $ticket->id)->first();
+        $actualizations = Actualization::with('user')->where('ticket_id', $ticket->id)->get();
+
+        return response()->json(['status' => true, 'data' => $ticket_res, 'actualizations' => $actualizations]);
     }
     public function ticket_move(Request $request, Ticket $ticket)
     {
