@@ -38,6 +38,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('ticket/{ticket}', [TicketController::class, 'get_ticket_by_id']);
     Route::post('ticket', [TicketController::class, 'store']);
     Route::put('ticket/{ticket}/status', [TicketController::class, 'update_ticket_status']);
+    Route::post('ticket/{ticket}/actualization', [TicketController::class, 'new_ticket_actualization']);
     Route::post('ticket-move/{ticket}', [TicketController::class, 'ticket_move']);
 
 

@@ -34,6 +34,24 @@ class TicketController extends Controller
     {
         //
     }
+    public function new_ticket_actualization(Ticket $ticket, Request $request)
+    {
+        //
+        $user_req = $request->user();
+        $user = User::where('id', $user_req->id)->first();
+        try {
+            $actualization = Actualization::create([
+                'description' => $request->description,
+            ]);
+            $actualization->ticket()->associate($ticket);
+            $actualization->user()->associate($user);
+            $actualization->save();
+            $actualizations = Actualization::with('user', 'ticket')->where('ticket_id', $ticket->id)->get();
+            return response()->json(['status' => true, 'data' => $actualizations]);
+        } catch (\Throwable $th) {
+            return response()->json(['status' => false, 'data' => $th->getMessage()], 200);
+        }
+    }
     public function get_ticket_by_id(Ticket $ticket)
     {
         $ticket_res = Ticket::with('department', 'user')->where('id', $ticket->id)->first();
