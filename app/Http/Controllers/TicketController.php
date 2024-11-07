@@ -6,6 +6,8 @@ use App\Events\TicketUpdated;
 use App\Models\Ticket;
 use App\Http\Controllers\Controller;
 use App\Models\Actualization;
+use App\Models\Status;
+use App\Models\TicketCategory;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -18,10 +20,21 @@ class TicketController extends Controller
     public function index()
     {
         //
-        $tickets_abiertos = Ticket::where('status', 'Abierto')->with('user', 'department')->get();
-        $tickets_en_proceso = Ticket::where('status', 'En Proceso')->with('user', 'department')->get();
-        $tickets_cancelados = Ticket::where('status', 'Cancelado')->with('user', 'department')->get();
-        $tickets_terminados = Ticket::where('status', 'Terminado')->with('user', 'department')->get();
+        $tickets_abiertos = Ticket::with('user', 'department', 'status', 'ticket_category')->whereHas('status', function ($query) {
+            $query->where('description', 'Abierto');
+        })->get();
+
+        $tickets_en_proceso = Ticket::with('user', 'department', 'status', 'ticket_category')->whereHas('status', function ($query) {
+            $query->where('description', 'En Proceso');
+        })->get();
+
+        $tickets_cancelados = Ticket::with('user', 'department', 'status', 'ticket_category')->whereHas('status', function ($query) {
+            $query->where('description', 'Cancelado');
+        })->get();
+
+        $tickets_terminados = Ticket::with('user', 'department', 'status', 'ticket_category')->whereHas('status', function ($query) {
+            $query->where('description', 'Terminado');
+        })->get();
         $tickets = [...$tickets_abiertos, ...$tickets_en_proceso, ...$tickets_cancelados];
         $tickets_numbers = ['abiertos' => $tickets_abiertos->count(), 'en_proceso' => $tickets_en_proceso->count(), 'cancelados' => $tickets_cancelados->count(), 'terminados' => $tickets_terminados->count()];
         return response()->json(['status' => true, 'data' => ['tickets' => $tickets, 'numbers' => $tickets_numbers]]);
@@ -54,10 +67,20 @@ class TicketController extends Controller
     }
     public function get_ticket_by_id(Ticket $ticket)
     {
-        $ticket_res = Ticket::with('department', 'user')->where('id', $ticket->id)->first();
+        $ticket_res = Ticket::with('department', 'user', 'status')->where('id', $ticket->id)->first();
         $actualizations = Actualization::with('user')->where('ticket_id', $ticket->id)->get();
 
         return response()->json(['status' => true, 'data' => $ticket_res, 'actualizations' => $actualizations]);
+    }
+
+    public function change_ticket_status(Ticket $ticket, Request $request)
+    {
+        $ticket_res = Ticket::with('department', 'status', 'user')->where('id', $ticket->id)->first();
+        $status = Status::where('description', $request->status)->first();
+        $ticket_res->status()->associate($status->id);
+        $ticket_res->save();
+        $new_ticket = Ticket::with('department', 'user', 'status', 'ticket_category')->where('id', $ticket->id)->first();
+        return response()->json(['status' => true, 'data' => $new_ticket]);
     }
     public function ticket_move(Request $request, Ticket $ticket)
     {
@@ -82,24 +105,30 @@ class TicketController extends Controller
             'user_id' => 'required|exists:users,id',
             'description' => 'required|string',
             'category' => 'required|exists:ticket_categories,id',
+            'priority' => 'string',
         ]);
 
         if ($validator->fails()) {
             return response()->json(['status' => false, 'errors' => $validator->errors()], 400);
         }
         try {
-            $ticket_user = User::select('names', 'surnames', 'department_id')->with('department:id,description')->where('id', $request->user_id)->firstOrFail();
+            $ticket_user = User::select('id', 'names', 'surnames', 'department_id')->with('department:id,description')->where('id', $request->user_id)->firstOrFail();
             $ticket = Ticket::create([
                 'description' => $request->description,
-                'priority' => 'Sin prioridad',
+                'priority' => $request->priority ? $request->priority : 'Sin prioridad',
                 'number_of_actualizations' => 0,
             ]);
+            $status_abierto = Status::where('description', 'Abierto')->first();
+            $ticket_category = TicketCategory::where('id', $request->category)->first();
+            $ticket->ticket_category()->associate($ticket_category->id);
             $ticket->user()->associate($ticket_user->id);
             $ticket->department()->associate($ticket_user->department->id);
-            return response()->json(['status' => true, 'data' => [$ticket_user]]);
+            $ticket->status()->associate($status_abierto->id);
+            $ticket->save();
+            return response()->json(['status' => true, 'data' => [$ticket]]);
         } catch (\Throwable $th) {
             //throw $th;
-            return response()->json(['status' => false, 'errors' => ['No se logro crear el ticket', $th->getMessage()], 500]);
+            return response()->json(['status' => false, 'errors' => ['No se logro crear el ticket', $th->getMessage()]], 500);
         }
     }
 

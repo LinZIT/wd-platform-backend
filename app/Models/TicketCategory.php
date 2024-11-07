@@ -8,5 +8,5 @@ use Illuminate\Database\Eloquent\Model;
 class TicketCategory extends Model
 {
     use HasFactory;
-    protected $fillable = ['description'];
+    protected $fillable = ['description', 'color'];
 }

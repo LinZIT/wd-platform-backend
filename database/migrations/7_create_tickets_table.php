@@ -20,9 +20,9 @@ return new class extends Migration
             $table->foreign('ticket_category_id')->references('id')->on('ticket_categories')->onUpdate('cascade')->onDelete('cascade');
             $table->unsignedBigInteger('department_id')->nullable();
             $table->foreign('department_id')->references('id')->on('departments')->onUpdate('cascade')->onDelete('cascade');
-            $table->string('category');
             $table->string('priority');
-            $table->string('status');
+            $table->unsignedBigInteger('status_id')->nullable();
+            $table->foreign('status_id')->references('id')->on('statuses')->onUpdate('cascade')->onDelete('cascade');
             $table->integer('number_of_actualizations');
             $table->timestamps();
         });

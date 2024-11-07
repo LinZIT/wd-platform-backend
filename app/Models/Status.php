@@ -8,6 +8,11 @@ use Illuminate\Database\Eloquent\Model;
 class Status extends Model
 {
     use HasFactory;
+    public function ticket()
+    {
+        return $this->belongsTo(Ticket::class);
+    }
+
     /**
      * The attributes that are mass assignable.
      *

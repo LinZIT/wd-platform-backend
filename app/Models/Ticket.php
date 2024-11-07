@@ -26,6 +26,10 @@ class Ticket extends Model
     {
         return $this->belongsTo(User::class);
     }
+    public function status()
+    {
+        return $this->belongsTo(Status::class);
+    }
 
     public function ticket_actualization()
     {
@@ -34,7 +38,6 @@ class Ticket extends Model
 
     protected $fillable = [
         'description',
-        'category',
         'priority',
         'number_of_actualizations',
     ];
