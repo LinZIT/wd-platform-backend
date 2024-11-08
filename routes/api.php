@@ -55,8 +55,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('status', [StatusController::class, 'create']);
     Route::put('ticket/{ticket}/status', [TicketController::class, 'change_ticket_status']);
 
+    // Ticket Priority
+    Route::put('ticket/{ticket}/priority', [TicketController::class, 'change_ticket_priority']);
 
-    // Status
+    // Roles
     Route::post('role', [RoleController::class, 'create']);
 
     // Chat Messages

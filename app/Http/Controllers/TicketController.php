@@ -67,7 +67,7 @@ class TicketController extends Controller
     }
     public function get_ticket_by_id(Ticket $ticket)
     {
-        $ticket_res = Ticket::with('department', 'user', 'status')->where('id', $ticket->id)->first();
+        $ticket_res = Ticket::with('department', 'user', 'status', 'ticket_category')->where('id', $ticket->id)->first();
         $actualizations = Actualization::with('user')->where('ticket_id', $ticket->id)->get();
 
         return response()->json(['status' => true, 'data' => $ticket_res, 'actualizations' => $actualizations]);
@@ -78,6 +78,15 @@ class TicketController extends Controller
         $ticket_res = Ticket::with('department', 'status', 'user')->where('id', $ticket->id)->first();
         $status = Status::where('description', $request->status)->first();
         $ticket_res->status()->associate($status->id);
+        $ticket_res->save();
+        $new_ticket = Ticket::with('department', 'user', 'status', 'ticket_category')->where('id', $ticket->id)->first();
+        return response()->json(['status' => true, 'data' => $new_ticket]);
+    }
+
+    public function change_ticket_priority(Ticket $ticket, Request $request)
+    {
+        $ticket_res = Ticket::with('department', 'status', 'user')->where('id', $ticket->id)->first();
+        $ticket_res->priority = $request->priority;
         $ticket_res->save();
         $new_ticket = Ticket::with('department', 'user', 'status', 'ticket_category')->where('id', $ticket->id)->first();
         return response()->json(['status' => true, 'data' => $new_ticket]);
