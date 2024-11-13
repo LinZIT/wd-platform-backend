@@ -15,6 +15,8 @@ class TicketCategoryController extends Controller
     public function index()
     {
         //
+        $categories = TicketCategory::all();
+        return response()->json(['status' => true, 'data' => $categories]);
     }
 
     /**
@@ -31,32 +33,16 @@ class TicketCategoryController extends Controller
      */
     public function store(Request $request)
     {
-        //
-        $validator = Validator::make($request->all(), [
-            'description' => 'required|string',
-            'color' => 'required|string',
-        ]);
-
+        $validator = Validator::make($request->all(), ['description' => 'required|string', 'color' => 'required|string',]);
         if ($validator->fails()) {
-            return response()->json([
-                'errors' => $validator->errors()
-            ], 400);
+            return response()->json(['errors' => $validator->errors()], 400);
         }
-
         try {
-            //code...
-            $ticketCategory = TicketCategory::create([
-                'description' => $request->description,
-                'color' => $request->color,
-            ]);
-            return response()->json([
-                'data' => $ticketCategory
-            ], 200);
+            $ticketCategory = TicketCategory::create(['description' => $request->description, 'color' => $request->color,]);
+            $ticket_categories = TicketCategory::all();
+            return response()->json(['data' => $ticket_categories], 200);
         } catch (\Throwable $th) {
-            //throw $th;
-            return response()->json([
-                'error' => $th->getMessage()
-            ], 500);
+            return response()->json(['error' => $th->getMessage()], 500);
         }
     }
 

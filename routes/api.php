@@ -46,7 +46,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('ticket-move/{ticket}', [TicketController::class, 'ticket_move']);
 
     // Ticket Categories
+    Route::get('ticket/category/all', [TicketCategoryController::class, 'index']);
     Route::post('ticket/category', [TicketCategoryController::class, 'store']);
+    Route::put('ticket/{ticket}/category', [TicketController::class, 'change_ticket_category']);
 
     // Department
     Route::post('department', [DepartmentController::class, 'create']);

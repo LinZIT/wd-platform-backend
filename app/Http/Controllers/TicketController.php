@@ -91,6 +91,20 @@ class TicketController extends Controller
         $new_ticket = Ticket::with('department', 'user', 'status', 'ticket_category')->where('id', $ticket->id)->first();
         return response()->json(['status' => true, 'data' => $new_ticket]);
     }
+    public function change_ticket_category(Ticket $ticket, Request $request)
+    {
+        try {
+            $ticket_cat = TicketCategory::where(['description' => $request->description])->firstOrFail();
+        } catch (\Throwable $th) {
+            return response()->json(['status' => false, 'error' => ['No se logro crear la categoria', $th->getMessage()]], 400);
+        }
+
+        $ticket_res = Ticket::with('department', 'status', 'user', 'ticket_category')->where('id', $ticket->id)->first();
+        $ticket_res->ticket_category()->associate($ticket_cat->id);
+        $ticket_res->save();
+        $new_ticket = Ticket::with('department', 'user', 'status', 'ticket_category')->where('id', $ticket->id)->first();
+        return response()->json(['status' => true, 'data' => $new_ticket]);
+    }
     public function ticket_move(Request $request, Ticket $ticket)
     {
         try {
@@ -113,7 +127,6 @@ class TicketController extends Controller
         $validator = Validator::make($request->all(), [
             'user_id' => 'required|exists:users,id',
             'description' => 'required|string',
-            'category' => 'required|exists:ticket_categories,id',
             'priority' => 'string',
         ]);
 
@@ -127,8 +140,8 @@ class TicketController extends Controller
                 'priority' => $request->priority ? $request->priority : 'Sin prioridad',
                 'number_of_actualizations' => 0,
             ]);
-            $status_abierto = Status::where('description', 'Abierto')->first();
-            $ticket_category = TicketCategory::where('id', $request->category)->first();
+            $status_abierto = Status::firstOrCreate(['description' => 'Abierto']);
+            $ticket_category = TicketCategory::firstOrCreate(['description' => 'Sin Categoria', 'color' => '#525252']);
             $ticket->ticket_category()->associate($ticket_category->id);
             $ticket->user()->associate($ticket_user->id);
             $ticket->department()->associate($ticket_user->department->id);
