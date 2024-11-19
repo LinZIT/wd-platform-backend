@@ -6,6 +6,7 @@ use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\StatusController;
 use App\Http\Controllers\TicketCategoryController;
+use App\Http\Controllers\TicketAssignmentController;
 use App\Http\Controllers\TicketController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -59,6 +60,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Ticket Priority
     Route::put('ticket/{ticket}/priority', [TicketController::class, 'change_ticket_priority']);
+    
+    // Ticket Assignment
+    Route::put('ticket/{ticket}/assign/{user}', [TicketAssignmentController::class, 'ticket_assignment']);
 
     // Roles
     Route::post('role', [RoleController::class, 'create']);
