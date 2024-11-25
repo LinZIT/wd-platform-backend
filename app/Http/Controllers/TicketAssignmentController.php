@@ -21,7 +21,7 @@ class TicketAssignmentController extends Controller
         try {
             //code...
             $ticket_assignments = TicketAssignment::with('user')->where('ticket_id', $ticket->id)->get();
-            return response()->json(['status' => true, 'data' => $ticket_assignment]);
+            return response()->json(['status' => true, 'data' => $ticket_assignments]);
         } catch (\Throwable $th) {
             //throw $th;
             return response()->json(['status' => false, 'errors' => ['El ticket no tiene asignaciones', $th->getMessage()], 400]);
@@ -40,19 +40,27 @@ class TicketAssignmentController extends Controller
      */
     public function ticket_assignment(Ticket $ticket, User $user)
     {
-        //
-        try {
-            //code...
-            $ticket_assignment = TicketAssignment::create();
-            $ticket_assignment->user()->associate($user);
-            $ticket_assignment->ticket()->associate($ticket);
-            $ticket_assignment->save();
+        $validator = TicketAssignment::where(['ticket_id' => $ticket->id, 'user_id' => $user->id])->first();
 
+        if (!$validator) {
+            try {
+                //code...
+                $ticket_assignment = TicketAssignment::create();
+                $ticket_assignment->user()->associate($user);
+                $ticket_assignment->ticket()->associate($ticket);
+                $ticket_assignment->save();
+
+                $ticket_assignments = TicketAssignment::with('user')->where('ticket_id', $ticket->id)->get();
+                return response()->json(['status' => true, 'data' => $ticket_assignments]);
+            } catch (\Throwable $th) {
+                //throw $th;
+                return response()->json(['status' => false, 'errors' => ['No se logro asignar el ticket', $th->getMessage()], 400]);
+            }
+        } else {
+            //
+            $res = TicketAssignment::where(['ticket_id' => $ticket->id, 'user_id' => $user->id])->delete();
             $ticket_assignments = TicketAssignment::with('user')->where('ticket_id', $ticket->id)->get();
-            return response()->json(['status' => true, 'data' => $ticket_assignment]);
-        } catch (\Throwable $th) {
-            //throw $th;
-            return response()->json(['status' => false, 'errors' => ['No se logro asignar el ticket', $th->getMessage()], 400]);
+            return response()->json(['status' => true, 'data' => $ticket_assignments]);
         }
     }
     public function show(Ticket $ticket)

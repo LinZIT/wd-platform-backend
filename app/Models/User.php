@@ -37,6 +37,10 @@ class User extends Authenticatable
         return $this->belongsToMany(Actualization::class);
     }
 
+    public function tickets()
+    {
+        return $this->belongsToMany(Ticket::class, 'ticket_assignments');
+    }
     /**
      * The attributes that are mass assignable.
      *

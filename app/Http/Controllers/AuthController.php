@@ -7,6 +7,7 @@ use App\Models\Department;
 use App\Models\GeneralActionRecord;
 use App\Models\Role;
 use App\Models\Status;
+use App\Models\Ticket;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -244,6 +245,25 @@ class AuthController extends Controller
         $user = User::with('status', 'role', 'department')->where('id', $data->id)->first();
         $user->token = $token;
         return response()->json(['user' => $user]);
+    }
+    public function get_user_by_id(Request $request, User $user)
+    {
+        $user_data = User::with('status', 'role', 'department')->where('id', $user->id)->first();
+        return response()->json(['status' => true, 'data' => $user]);
+    }
+    public function get_it_users_paginated(Request $request, Ticket $ticket)
+    {
+        $users = User::select('color', 'status_id', 'id', 'department_id', 'names', 'surnames')
+            ->with('status', 'department')
+            ->whereHas('department', function ($query) {
+                $query = Department::where('description', 'IT');
+            })
+            ->whereDoesntHave('tickets', function ($query) use ($ticket) {
+                $query->where('tickets.id', $ticket->id);
+            })
+            ->paginate();
+
+        return response()->json(['status' => true, 'data' => $users]);
     }
 
     public function change_password(Request $request, User $user)

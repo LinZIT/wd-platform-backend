@@ -36,6 +36,11 @@ class Ticket extends Model
         return $this->belongsToMany(Actualization::class);
     }
 
+    public function users()
+    {
+        return $this->belongsToMany(User::class, 'ticket_assignments');
+    }
+
     protected $fillable = [
         'description',
         'priority',
