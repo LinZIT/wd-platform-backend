@@ -53,6 +53,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('ticket/category/all', [TicketCategoryController::class, 'index']);
     Route::post('ticket/category', [TicketCategoryController::class, 'store']);
     Route::put('ticket/{ticket}/category', [TicketController::class, 'change_ticket_category']);
+    Route::get('ticket/get/open', [TicketController::class, 'get_open_tickets']);
+    Route::get('ticket/get/in_process', [TicketController::class, 'get_in_process_tickets']);
+    Route::get('ticket/get/cancelled', [TicketController::class, 'get_cancelled_tickets']);
+    Route::get('ticket/get/finished', [TicketController::class, 'get_finished_tickets']);
+
 
     // Department
     Route::post('department', [DepartmentController::class, 'create']);

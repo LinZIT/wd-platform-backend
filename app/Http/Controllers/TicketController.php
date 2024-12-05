@@ -24,34 +24,79 @@ class TicketController extends Controller
         $tickets_abiertos = Ticket::with('user', 'department', 'status', 'ticket_category')->whereHas('status', function ($query) {
             $query->where('description', 'Abierto');
         })->get();
-        foreach($tickets_abiertos as $ticket_abierto){
+        foreach ($tickets_abiertos as $ticket_abierto) {
             $ticket_abierto->assignments = TicketAssignment::with('user')->where('ticket_id', $ticket_abierto->id)->get();
         }
-        
+
         $tickets_en_proceso = Ticket::with('user', 'department', 'status', 'ticket_category')->whereHas('status', function ($query) {
             $query->where('description', 'En Proceso');
         })->get();
-        foreach($tickets_en_proceso as $ticket_en_proceso){
+        foreach ($tickets_en_proceso as $ticket_en_proceso) {
             $ticket_en_proceso->assignments = TicketAssignment::with('user')->where('ticket_id', $ticket_en_proceso->id)->get();
         }
-        
+
         $tickets_cancelados = Ticket::with('user', 'department', 'status', 'ticket_category')->whereHas('status', function ($query) {
             $query->where('description', 'Cancelado');
         })->get();
-        
-        foreach($tickets_cancelados as $ticket_cancelado){
+
+        foreach ($tickets_cancelados as $ticket_cancelado) {
             $ticket_cancelado->assignments = TicketAssignment::with('user')->where('ticket_id', $ticket_cancelado->id)->get();
         }
         $tickets_terminados = Ticket::with('user', 'department', 'status', 'ticket_category')->whereHas('status', function ($query) {
             $query->where('description', 'Terminado');
         })->get();
-        foreach($tickets_terminados as $ticket_terminado){
+        foreach ($tickets_terminados as $ticket_terminado) {
             $ticket_terminado->assignments = TicketAssignment::with('user')->where('ticket_id', $ticket_terminado->id)->get();
         }
         $tickets = [...$tickets_abiertos, ...$tickets_en_proceso, ...$tickets_cancelados];
         $tickets_numbers = ['abiertos' => $tickets_abiertos->count(), 'en_proceso' => $tickets_en_proceso->count(), 'cancelados' => $tickets_cancelados->count(), 'terminados' => $tickets_terminados->count()];
         return response()->json(['status' => true, 'data' => ['tickets' => $tickets, 'numbers' => $tickets_numbers]]);
     }
+
+    public function get_open_tickets()
+    {
+        $tickets_abiertos = Ticket::with('user', 'department', 'status', 'ticket_category')->whereHas('status', function ($query) {
+            $query->where('description', 'Abierto');
+        })->paginate();
+        foreach ($tickets_abiertos as $ticket_abierto) {
+            $ticket_abierto->assignments = TicketAssignment::with('user')->where('ticket_id', $ticket_abierto->id)->get();
+        }
+        return response()->json(['status' => true, 'data' => $tickets_abiertos]);
+    }
+
+    public function get_in_process_tickets()
+    {
+        $tickets_en_proceso = Ticket::with('user', 'department', 'status', 'ticket_category')->whereHas('status', function ($query) {
+            $query->where('description', 'En Proceso');
+        })->paginate();
+        foreach ($tickets_en_proceso as $ticket_en_proceso) {
+            $ticket_en_proceso->assignments = TicketAssignment::with('user')->where('ticket_id', $ticket_en_proceso->id)->get();
+        }
+        return response()->json(['status' => true, 'data' => $tickets_en_proceso]);
+    }
+
+    public function get_cancelled_tickets()
+    {
+        $tickets_cancelados = Ticket::with('user', 'department', 'status', 'ticket_category')->whereHas('status', function ($query) {
+            $query->where('description', 'Cancelado');
+        })->paginate();
+        foreach ($tickets_cancelados as $ticket_cancelado) {
+            $ticket_cancelado->assignments = TicketAssignment::with('user')->where('ticket_id', $ticket_cancelado->id)->get();
+        }
+        return response()->json(['status' => true, 'data' => $tickets_cancelados]);
+    }
+
+    public function get_finished_tickets()
+    {
+        $tickets_terminados = Ticket::with('user', 'department', 'status', 'ticket_category')->whereHas('status', function ($query) {
+            $query->where('description', 'Terminado');
+        })->paginate();
+        foreach ($tickets_terminados as $ticket_terminado) {
+            $ticket_terminado->assignments = TicketAssignment::with('user')->where('ticket_id', $ticket_terminado->id)->get();
+        }
+        return response()->json(['status' => true, 'data' => $tickets_terminados]);
+    }
+
 
     /**
      * Show the form for creating a new resource.
