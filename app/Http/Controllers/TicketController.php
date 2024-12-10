@@ -133,24 +133,40 @@ class TicketController extends Controller
 
     public function change_ticket_status(Ticket $ticket, Request $request)
     {
+        
         $ticket_res = Ticket::with('department', 'status', 'user')->where('id', $ticket->id)->first();
+        $prev_status = $ticket_res->status->description;
         $status = Status::where('description', $request->status)->first();
         $ticket_res->status()->associate($status->id);
         $ticket_res->save();
+        // Historial de accion de tickets
+        $ticket_action = TicketActionHistory::create(['description' => "El usuario $user->names $user->surnames ($user->document) cambio el status del ticket (Nuevo Status: $request->status, Previo Status: $prev_status)."]);
+        $ticket_action->user()->associate($user->id);
+        $ticket_action->ticket()->associate($ticket_res->id);
+        $ticket_action->save();
         $new_ticket = Ticket::with('department', 'user', 'status', 'ticket_category')->where('id', $ticket->id)->first();
         return response()->json(['status' => true, 'data' => $new_ticket]);
     }
 
     public function change_ticket_priority(Ticket $ticket, Request $request)
     {
+
+        $user = $request->user();
         $ticket_res = Ticket::with('department', 'status', 'user')->where('id', $ticket->id)->first();
         $ticket_res->priority = $request->priority;
         $ticket_res->save();
+        // Historial de accion de tickets
+        $ticket_action = TicketActionHistory::create(['description' => "El usuario $user->names $user->surnames ($user->document) cambio la prioridad del ticket.",]);
+        $ticket_action->user()->associate($user->id);
+        $ticket_action->ticket()->associate($ticket_res->id);
+        $ticket_action->save();
         $new_ticket = Ticket::with('department', 'user', 'status', 'ticket_category')->where('id', $ticket->id)->first();
         return response()->json(['status' => true, 'data' => $new_ticket]);
     }
     public function change_ticket_category(Ticket $ticket, Request $request)
     {
+
+        $user = $request->user();
         try {
             $ticket_cat = TicketCategory::where(['description' => $request->description])->firstOrFail();
         } catch (\Throwable $th) {
@@ -160,6 +176,11 @@ class TicketController extends Controller
         $ticket_res = Ticket::with('department', 'status', 'user', 'ticket_category')->where('id', $ticket->id)->first();
         $ticket_res->ticket_category()->associate($ticket_cat->id);
         $ticket_res->save();
+        // Historial de accion de tickets
+        $ticket_action = TicketActionHistory::create(['description' => "El usuario $user->names $user->surnames ($user->document) cambio la categoria del ticket.",]);
+        $ticket_action->user()->associate($user->id);
+        $ticket_action->ticket()->associate($ticket_res->id);
+        $ticket_action->save();
         $new_ticket = Ticket::with('department', 'user', 'status', 'ticket_category')->where('id', $ticket->id)->first();
         return response()->json(['status' => true, 'data' => $new_ticket]);
     }
@@ -205,6 +226,12 @@ class TicketController extends Controller
             $ticket->department()->associate($ticket_user->department->id);
             $ticket->status()->associate($status_abierto->id);
             $ticket->save();
+            // Historial de accion de tickets
+            $ticket_action = TicketActionHistory::create(['description' => "El usuario $ticket_user->names $ticket_user->surnames ($ticket_user->document) creo un ticket nuevo (id: $ticket->id, description: $ticket->description)",]);
+            $ticket_action->user()->associate($ticket_user->id);
+            $ticket_action->ticket()->associate($ticket->id);
+            $ticket_action->save();
+            
             return response()->json(['status' => true, 'data' => [$ticket]]);
         } catch (\Throwable $th) {
             //throw $th;
