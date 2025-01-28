@@ -24,6 +24,7 @@ return new class extends Migration
             $table->unsignedBigInteger('status_id')->nullable();
             $table->foreign('status_id')->references('id')->on('statuses')->onUpdate('cascade')->onDelete('cascade');
             $table->integer('number_of_actualizations');
+            $table->tinyInteger('new')->default('1');
             $table->timestamps();
         });
     }
@@ -33,6 +34,8 @@ return new class extends Migration
      */
     public function down(): void
     {
+        Schema::disableForeignKeyConstraints();
         Schema::dropIfExists('tickets');
+        Schema::enableForeignKeyConstraints();
     }
 };

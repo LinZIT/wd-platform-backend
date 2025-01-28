@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\TicketAssignUser;
 use App\Models\Ticket;
 use App\Models\TicketAssignment;
 use App\Http\Controllers\Controller;
 use App\Models\Actualization;
+use App\Models\Department;
 use App\Models\Status;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -41,7 +43,7 @@ class TicketAssignmentController extends Controller
     public function ticket_assignment(Ticket $ticket, User $user)
     {
         $validator = TicketAssignment::where(['ticket_id' => $ticket->id, 'user_id' => $user->id])->first();
-
+        $it_department = Department::where('description', 'IT')->firstOrNew();
         if (!$validator) {
             try {
                 //code...
@@ -49,17 +51,19 @@ class TicketAssignmentController extends Controller
                 $ticket_assignment->user()->associate($user);
                 $ticket_assignment->ticket()->associate($ticket);
                 $ticket_assignment->save();
-
                 $ticket_assignments = TicketAssignment::with('user')->where('ticket_id', $ticket->id)->get();
+                broadcast(new TicketAssignUser($ticket->id, $user->id, 'add', $it_department->id));
                 return response()->json(['status' => true, 'data' => $ticket_assignments]);
             } catch (\Throwable $th) {
                 //throw $th;
-                return response()->json(['status' => false, 'errors' => ['No se logro asignar el ticket', $th->getMessage()], 400]);
+                return response()->json(['status' => false, 'errors'
+                => ['No se logro asignar el ticket', $th->getMessage()], 400]);
             }
         } else {
             //
             $res = TicketAssignment::where(['ticket_id' => $ticket->id, 'user_id' => $user->id])->delete();
             $ticket_assignments = TicketAssignment::with('user')->where('ticket_id', $ticket->id)->get();
+            broadcast(new TicketAssignUser($ticket->id, $user->id, 'remove', $it_department->id));
             return response()->json(['status' => true, 'data' => $ticket_assignments]);
         }
     }

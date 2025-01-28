@@ -5,9 +5,7 @@ namespace App\Http\Controllers;
 use App\Events\MessageSent;
 use App\Models\ChatMessage;
 use App\Models\User;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 
 class ChatMessageController extends Controller
 {
