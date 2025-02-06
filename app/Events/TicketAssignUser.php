@@ -23,7 +23,9 @@ class TicketAssignUser implements ShouldBroadcast
     }
     public function broadcastWith()
     {
-        $ticket_assignments = TicketAssignment::with('user')->where('ticket_id', $this->ticket_id)->get();
+        $ticket_assignments = TicketAssignment::with(['user' => function ($query) {
+            $query->select('id', 'names', 'surnames', 'color');
+        }])->where('ticket_id', $this->ticket_id)->get();
         return [
             'ticket_assignments' => $ticket_assignments,
             'assigned_user' => $this->assigned_user,

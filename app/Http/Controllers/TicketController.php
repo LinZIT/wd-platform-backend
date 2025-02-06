@@ -247,7 +247,7 @@ class TicketController extends Controller
         $ticket_action->ticket()->associate($ticket_res->id);
         $ticket_action->save();
         $new_ticket = Ticket::with('department', 'user', 'status', 'ticket_category')->where('id', $ticket->id)->first();
-        broadcast(new TicketPriorityChanged($request->priority, $department->id));
+        broadcast(new TicketPriorityChanged($request->priority, $new_ticket, $department->id));
         return response()->json(['status' => true, 'data' => $new_ticket]);
     }
     public function change_ticket_category(Ticket $ticket, Request $request)

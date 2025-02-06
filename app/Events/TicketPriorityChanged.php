@@ -2,22 +2,21 @@
 
 namespace App\Events;
 
-use Illuminate\Broadcasting\Channel;
+use App\Models\Ticket;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PresenceChannel;
-use Illuminate\Broadcasting\PrivateChannel;
-use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
+use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class TicketPriorityChanged
+class TicketPriorityChanged implements ShouldBroadcastNow
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
     /**
      * Create a new event instance.
      */
-    public function __construct(public string $priority, public int $description_id)
+    public function __construct(public string $priority, public Ticket $ticket, public int $department_id)
     {
         //
     }
@@ -30,7 +29,7 @@ class TicketPriorityChanged
     public function broadcastOn(): array
     {
         return [
-            new PresenceChannel('ticketsRoom.' . $this->description_id),
+            new PresenceChannel('ticketsRoom.' . $this->department_id),
         ];
     }
 }
